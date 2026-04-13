@@ -7,8 +7,8 @@
   const ctx = canvas.getContext('2d');
 
   // Use the fixed slide dimensions (not the scaled/transformed ones)
-  let W = 420;
-  let H = 280;
+  let W = 640;
+  let H = 360;
   const PARTICLE_COUNT = 500;
   const particles = [];
   let phase = 'sphere';

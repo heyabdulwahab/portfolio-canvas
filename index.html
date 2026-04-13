@@ -38,59 +38,65 @@
     <div class="side-menu__overlay" id="menuOverlay"></div>
     <div class="side-menu__panel">
       <div class="side-menu__header">
-        <span class="side-menu__name">Abdul Wahab</span>
-        <button class="side-menu__close" id="menuClose">
+        <button class="side-menu__close" id="menuClose" aria-label="Close menu">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
+        <p class="side-menu__sig">wahab</p>
       </div>
       <nav class="side-menu__nav">
-        <a href="#intro" class="side-menu__link" data-goto="intro">Why me</a>
-        <a href="#endorsements" class="side-menu__link" data-goto="endorsements">Endorsements</a>
-        <a href="#work" class="side-menu__link" data-goto="work">Portfolio</a>
-        <a href="#side-projects" class="side-menu__link" data-goto="side-projects">Side Projects</a>
-        <a href="#contact" class="side-menu__link" data-goto="contact">Reach out</a>
+        <a href="#hero" class="side-menu__link" data-goto="hero">Home</a>
+        <a href="#intro" class="side-menu__link" data-goto="intro">Who Am I</a>
+        <div class="side-menu__group">
+          <a href="#work" class="side-menu__link" data-goto="work">Work</a>
+          <div class="side-menu__sub">
+            <a href="#gastronaut" class="side-menu__sublink" data-goto="gastronaut">Gastronaut GmbH</a>
+            <a href="#pkpage" class="side-menu__sublink" data-goto="pkpage">PK.Page</a>
+            <a href="#birdapp" class="side-menu__sublink" data-goto="birdapp">BirdAppAds</a>
+            <a href="#moolah" class="side-menu__sublink" data-goto="moolah">Moolah Cash</a>
+            <a href="#carnaan" class="side-menu__sublink" data-goto="carnaan">Carnaan</a>
+            <a href="#axe" class="side-menu__sublink" data-goto="axe">Axe Automation</a>
+          </div>
+        </div>
+        <a href="#contact" class="side-menu__link side-menu__link--contact" data-goto="contact">Contact</a>
       </nav>
     </div>
   </div>
 
 
-  <!-- Presentation Mode Controls -->
+  <!-- Presentation Mode Controls (simplified) -->
   <div class="pres-bar" id="presBar">
     <button class="pres-bar__btn" id="presRewind" title="Previous">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 19 2 12 11 5"/><polygon points="22 19 13 12 22 5"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <button class="pres-bar__play" id="presPlay" title="Play/Pause">
-      <svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      <svg class="pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-    </button>
+    <span class="pres-bar__counter" id="presCounter">1 / 40</span>
     <button class="pres-bar__btn" id="presFastFwd" title="Next">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 19 22 12 13 5"/><polygon points="2 19 11 12 2 5"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
     </button>
     <span class="pres-bar__divider"></span>
-    <button class="pres-bar__btn" id="presGrid" title="Grid view">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    <button class="pres-bar__btn pres-bar__exit" id="presExit" title="Exit presentation">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-    <button class="pres-bar__btn" id="presShare" title="Share">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-    </button>
-    <button class="pres-bar__btn pres-bar__expand" id="presExpand" title="Expand">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-    <div class="pres-bar__timeline">
-      <span class="pres-bar__time" id="presTimeStart">00:00</span>
-      <div class="pres-bar__track" id="presTrack">
-        <div class="pres-bar__progress" id="presProgress"></div>
-        <div class="pres-bar__thumb" id="presThumb"></div>
-      </div>
-      <span class="pres-bar__time" id="presTimeEnd">00:37</span>
-    </div>
   </div>
 
 
-  <!-- Scroll arrows -->
-  <div class="scroll-arrows">
-    <button class="scroll-arrow scroll-arrow--up" id="scrollUp"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></button>
-    <button class="scroll-arrow scroll-arrow--down" id="scrollDown"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+  <!-- Direction pad (bottom-right, desktop only) -->
+  <div class="dir-pad" id="dirPad">
+    <button class="dir-btn dir-btn--up" id="scrollUp" title="Pan up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></button>
+    <div class="dir-pad__mid">
+      <button class="dir-btn dir-btn--left" id="scrollLeft" title="Pan left"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="dir-btn dir-btn--right" id="scrollRight" title="Pan right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+    <button class="dir-btn dir-btn--down" id="scrollDown" title="Pan down"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+  </div>
+
+  <!-- Zoom controls (bottom-left, desktop only) -->
+  <div class="zoom-pad" id="zoomPad">
+    <button class="zoom-btn" id="zoomInBtn" title="Zoom in">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <button class="zoom-btn" id="zoomOutBtn" title="Zoom out">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
   </div>
 
   <!-- Canvas Viewport -->

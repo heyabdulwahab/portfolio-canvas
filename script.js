@@ -7,21 +7,12 @@
   const themeToggle = document.querySelector('.theme-toggle'); // not present in new design, keep for fallback
   const presenterBtn = document.getElementById('presenterBtn');
   const presBar = document.getElementById('presBar');
-  const presPlay = document.getElementById('presPlay');
   const presRewind = document.getElementById('presRewind');
   const presFastFwd = document.getElementById('presFastFwd');
-  const presGrid = document.getElementById('presGrid');
-  const presExit = document.getElementById('presExpand');
-  const presProgress = document.getElementById('presProgress');
-  const presThumb = document.getElementById('presThumb');
-  const presTrack = document.getElementById('presTrack');
-  const presTimeStart = document.getElementById('presTimeStart');
-  const presTimeEnd = document.getElementById('presTimeEnd');
   const menuBtn = document.getElementById('menuBtn');
   const sideMenu = document.getElementById('sideMenu');
   const menuOverlay = document.getElementById('menuOverlay');
   const menuClose = document.getElementById('menuClose');
-  const bottomToolbar = document.getElementById('bottomToolbar'); // may be null
   const loadingScreen = document.getElementById('loadingScreen');
   const loadingTextEl = document.getElementById('loadingText');
 
@@ -49,9 +40,9 @@
   }, 1500);
 
   // ====== SLIDE LAYOUT ======
-  const SLIDE_W = 420;
-  const SLIDE_H = 280;
-  const GAP = 28;
+  const SLIDE_W = 640;
+  const SLIDE_H = 360;
+  const GAP = 40;
   const CANVAS_PAD = 200;
 
   // Position slides on the grid based on data-row / data-col
@@ -185,11 +176,17 @@
     }
   });
 
-  // Touch
+  // ====== TOUCH (mobile: 1-finger drag, 2-finger pinch-to-zoom) ======
   let touchId = null;
+  let lastTouchDist = 0;
+  let lastTouchMidX = 0;
+  let lastTouchMidY = 0;
+  let touchMode = 'none'; // 'drag' | 'pinch' | 'none'
+
   viewport.addEventListener('touchstart', (e) => {
     if (presenting) return;
     if (e.touches.length === 1) {
+      touchMode = 'drag';
       isDragging = true;
       hasMoved = false;
       touchId = e.touches[0].identifier;
@@ -197,29 +194,98 @@
       dragStartY = e.touches[0].clientY;
       panStartX = panX;
       panStartY = panY;
+    } else if (e.touches.length === 2) {
+      // Switch to pinch mode
+      touchMode = 'pinch';
+      isDragging = false;
+      const t0 = e.touches[0], t1 = e.touches[1];
+      lastTouchDist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+      lastTouchMidX = (t0.clientX + t1.clientX) / 2;
+      lastTouchMidY = (t0.clientY + t1.clientY) / 2;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  viewport.addEventListener('touchmove', (e) => {
+    if (presenting) return;
+
+    if (touchMode === 'drag' && e.touches.length === 1) {
+      const touch = e.touches[0];
+      const dx = touch.clientX - dragStartX;
+      const dy = touch.clientY - dragStartY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
+      panX = panStartX + dx;
+      panY = panStartY + dy;
+      applyTransform();
+    } else if (touchMode === 'pinch' && e.touches.length === 2) {
+      e.preventDefault();
+      const t0 = e.touches[0], t1 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+      const midX = (t0.clientX + t1.clientX) / 2;
+      const midY = (t0.clientY + t1.clientY) / 2;
+
+      // Zoom toward pinch center
+      const zoomFactor = dist / lastTouchDist;
+      const rect = viewport.getBoundingClientRect();
+      const mx = midX - rect.left;
+      const my = midY - rect.top;
+      const wx = (mx - panX) / scale;
+      const wy = (my - panY) / scale;
+
+      scale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, scale * zoomFactor));
+      panX = mx - wx * scale;
+      panY = my - wy * scale;
+
+      // Also pan with two-finger drag
+      panX += midX - lastTouchMidX;
+      panY += midY - lastTouchMidY;
+
+      lastTouchDist = dist;
+      lastTouchMidX = midX;
+      lastTouchMidY = midY;
+      applyTransform();
+    }
+  }, { passive: false });
+
+  viewport.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) {
+      isDragging = false;
+      touchMode = 'none';
+    } else if (e.touches.length === 1) {
+      // Went from pinch to single finger — restart drag
+      touchMode = 'drag';
+      isDragging = true;
+      dragStartX = e.touches[0].clientX;
+      dragStartY = e.touches[0].clientY;
+      panStartX = panX;
+      panStartY = panY;
     }
   }, { passive: true });
 
-  viewport.addEventListener('touchmove', (e) => {
-    if (!isDragging || presenting) return;
-    const touch = Array.from(e.touches).find(t => t.identifier === touchId);
-    if (!touch) return;
-    const dx = touch.clientX - dragStartX;
-    const dy = touch.clientY - dragStartY;
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
-    panX = panStartX + dx;
-    panY = panStartY + dy;
-    applyTransform();
-  }, { passive: true });
-
-  viewport.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
-
-  // ====== SCROLL = PAN (two-finger scroll / trackpad drags the canvas) ======
+  // ====== WHEEL: Ctrl/Cmd+scroll = zoom, plain scroll = pan (Figma-style) ======
   viewport.addEventListener('wheel', (e) => {
     if (presenting) return;
     e.preventDefault();
-    panX -= e.deltaX;
-    panY -= e.deltaY;
+
+    if (e.ctrlKey || e.metaKey) {
+      // Pinch-to-zoom on trackpad sends ctrlKey + deltaY
+      const rect = viewport.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const zoomIntensity = 0.01;
+      const factor = 1 - e.deltaY * zoomIntensity;
+      const newScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, scale * factor));
+      const wx = (mx - panX) / scale;
+      const wy = (my - panY) / scale;
+      scale = newScale;
+      panX = mx - wx * scale;
+      panY = my - wy * scale;
+    } else {
+      // Plain scroll = pan
+      panX -= e.deltaX;
+      panY -= e.deltaY;
+    }
+
     applyTransform();
   }, { passive: false });
 
@@ -256,6 +322,8 @@
     if (animate) animateTransform(); else applyTransform();
   }
 
+  const isMobile = window.innerWidth <= 768;
+
   function fitAll(animate) {
     const vw = viewport.clientWidth;
     const vh = viewport.clientHeight;
@@ -270,10 +338,12 @@
     });
     const cw = maxX - minX;
     const ch = maxY - minY;
-    const pad = 120;
+    const pad = isMobile ? 40 : 120;
     const scX = (vw - pad * 2) / cw;
     const scY = (vh - pad * 2) / ch;
-    scale = Math.min(scX, scY, 1);
+    // On mobile, don't zoom out below 0.12 so slides stay readable
+    const minScale = isMobile ? 0.12 : 0.05;
+    scale = Math.max(minScale, Math.min(scX, scY, 1));
     panX = (vw / 2) - ((minX + maxX) / 2) * scale;
     panY = (vh / 2) - ((minY + maxY) / 2) * scale;
     if (animate) animateTransform(); else applyTransform();
@@ -300,33 +370,28 @@
     });
   });
 
-  // ====== PRESENTATION MODE ======
+  // ====== PRESENTATION MODE (manual, no autoplay) ======
+  const presCounter = document.getElementById('presCounter');
+  const presExitBtn = document.getElementById('presExit');
+
   function enterPresentation() {
     presenting = true;
     currentSlide = 0;
     document.body.classList.add('presenting');
     viewport.classList.add('presenting');
     presBar.classList.add('active');
-    if (bottomToolbar) bottomToolbar.style.display = 'none';
 
     slideOrder.forEach(s => s.classList.remove('spotlight'));
     slideOrder[0].classList.add('spotlight');
     centerOnSlide(slideOrder[0], true);
     updatePresUI();
-
-    // Auto-start playing
-    startPlaying();
   }
 
   function exitPresentation() {
     presenting = false;
-    presPlaying = false;
-    clearInterval(presInterval);
     document.body.classList.remove('presenting');
     viewport.classList.remove('presenting');
     presBar.classList.remove('active');
-    presBar.classList.remove('playing');
-    if (bottomToolbar) bottomToolbar.style.display = '';
     slideOrder.forEach(s => s.classList.remove('spotlight'));
     fitAll(true);
   }
@@ -338,78 +403,21 @@
     slideOrder[currentSlide].classList.add('spotlight');
     centerOnSlide(slideOrder[currentSlide], animate);
     updatePresUI();
-
-    // Update hash
     const id = slideOrder[currentSlide].id;
     if (id) history.replaceState(null, '', '#' + id);
   }
 
-  function startPlaying() {
-    presPlaying = true;
-    presBar.classList.add('playing');
-    clearInterval(presInterval);
-    presInterval = setInterval(() => {
-      if (currentSlide < totalSlides - 1) {
-        goToPresSlide(currentSlide + 1, true);
-      } else {
-        stopPlaying();
-      }
-    }, SLIDE_DURATION);
-  }
-
-  function stopPlaying() {
-    presPlaying = false;
-    presBar.classList.remove('playing');
-    clearInterval(presInterval);
-  }
-
   function updatePresUI() {
-    const progress = totalSlides > 1 ? (currentSlide / (totalSlides - 1)) * 100 : 0;
-    presProgress.style.width = progress + '%';
-    presThumb.style.left = progress + '%';
-
-    // Time
-    const totalTime = totalSlides * (SLIDE_DURATION / 1000);
-    const currentTime = currentSlide * (SLIDE_DURATION / 1000);
-    presTimeStart.textContent = formatTime(currentTime);
-    presTimeEnd.textContent = formatTime(totalTime);
+    presCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+    presRewind.disabled = currentSlide <= 0;
+    presFastFwd.disabled = currentSlide >= totalSlides - 1;
   }
 
-  function formatTime(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-  }
-
-  // Pres controls
   presenterBtn.addEventListener('click', enterPresentation);
+  presExitBtn.addEventListener('click', exitPresentation);
 
-  presPlay.addEventListener('click', () => {
-    if (presPlaying) stopPlaying();
-    else startPlaying();
-  });
-
-  presRewind.addEventListener('click', () => {
-    stopPlaying();
-    goToPresSlide(currentSlide - 1, true);
-  });
-
-  presFastFwd.addEventListener('click', () => {
-    stopPlaying();
-    goToPresSlide(currentSlide + 1, true);
-  });
-
-  presGrid.addEventListener('click', exitPresentation);
-  presExit.addEventListener('click', exitPresentation);
-
-  // Timeline scrubbing
-  presTrack.addEventListener('click', (e) => {
-    const rect = presTrack.getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
-    const idx = Math.round(pct * (totalSlides - 1));
-    stopPlaying();
-    goToPresSlide(Math.max(0, Math.min(totalSlides - 1, idx)), true);
-  });
+  presRewind.addEventListener('click', () => goToPresSlide(currentSlide - 1, true));
+  presFastFwd.addEventListener('click', () => goToPresSlide(currentSlide + 1, true));
 
   // ====== KEYBOARD ======
   document.addEventListener('keydown', (e) => {
@@ -419,20 +427,15 @@
         case 'ArrowDown':
         case ' ':
           e.preventDefault();
-          stopPlaying();
           goToPresSlide(currentSlide + 1, true);
           break;
         case 'ArrowLeft':
         case 'ArrowUp':
           e.preventDefault();
-          stopPlaying();
           goToPresSlide(currentSlide - 1, true);
           break;
         case 'Escape':
           exitPresentation();
-          break;
-        case 'p':
-          if (presPlaying) stopPlaying(); else startPlaying();
           break;
       }
     } else {
@@ -449,14 +452,20 @@
     }
   });
 
-  // ====== SCROLL ARROWS ======
-  document.getElementById('scrollUp').addEventListener('click', () => {
-    panY += 200;
+  // ====== DIRECTION PAD ======
+  const PAN_STEP = 200;
+  document.getElementById('scrollUp').addEventListener('click', () => { panY += PAN_STEP; animateTransform(); });
+  document.getElementById('scrollDown').addEventListener('click', () => { panY -= PAN_STEP; animateTransform(); });
+  document.getElementById('scrollLeft').addEventListener('click', () => { panX += PAN_STEP; animateTransform(); });
+  document.getElementById('scrollRight').addEventListener('click', () => { panX -= PAN_STEP; animateTransform(); });
+
+  // ====== ZOOM BUTTONS ======
+  document.getElementById('zoomInBtn').addEventListener('click', () => {
+    scale = Math.min(ZOOM_MAX, scale * 1.25);
     animateTransform();
   });
-
-  document.getElementById('scrollDown').addEventListener('click', () => {
-    panY -= 200;
+  document.getElementById('zoomOutBtn').addEventListener('click', () => {
+    scale = Math.max(ZOOM_MIN, scale * 0.75);
     animateTransform();
   });
 
