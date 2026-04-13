@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Abdul Wahab — Senior UI/UX Designer</title>
+  <meta name="description" content="Portfolio of Abdul Wahab, Senior UI/UX Designer at Accenture Song | Figma Chapter Leader | Webflow Expert">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <p class="loading-text" id="loadingText">Obsessing over kerning...</p>
+  </div>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar__left">
+      <button class="menu-btn" id="menuBtn" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Slide Presenting Button (bottom center) -->
+  <button class="presenter-btn" id="presenterBtn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Slide Presenting
+  </button>
+
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <div class="side-menu__overlay" id="menuOverlay"></div>
+    <div class="side-menu__panel">
+      <div class="side-menu__header">
+        <span class="side-menu__name">Abdul Wahab</span>
+        <button class="side-menu__close" id="menuClose">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <nav class="side-menu__nav">
+        <a href="#intro" class="side-menu__link" data-goto="intro">Why me</a>
+        <a href="#endorsements" class="side-menu__link" data-goto="endorsements">Endorsements</a>
+        <a href="#work" class="side-menu__link" data-goto="work">Portfolio</a>
+        <a href="#side-projects" class="side-menu__link" data-goto="side-projects">Side Projects</a>
+        <a href="#contact" class="side-menu__link" data-goto="contact">Reach out</a>
+      </nav>
+    </div>
+  </div>
+
+
+  <!-- Presentation Mode Controls -->
+  <div class="pres-bar" id="presBar">
+    <button class="pres-bar__btn" id="presRewind" title="Previous">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 19 2 12 11 5"/><polygon points="22 19 13 12 22 5"/></svg>
+    </button>
+    <button class="pres-bar__play" id="presPlay" title="Play/Pause">
+      <svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <svg class="pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    </button>
+    <button class="pres-bar__btn" id="presFastFwd" title="Next">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 19 22 12 13 5"/><polygon points="2 19 11 12 2 5"/></svg>
+    </button>
+    <span class="pres-bar__divider"></span>
+    <button class="pres-bar__btn" id="presGrid" title="Grid view">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </button>
+    <button class="pres-bar__btn" id="presShare" title="Share">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    </button>
+    <button class="pres-bar__btn pres-bar__expand" id="presExpand" title="Expand">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <div class="pres-bar__timeline">
+      <span class="pres-bar__time" id="presTimeStart">00:00</span>
+      <div class="pres-bar__track" id="presTrack">
+        <div class="pres-bar__progress" id="presProgress"></div>
+        <div class="pres-bar__thumb" id="presThumb"></div>
+      </div>
+      <span class="pres-bar__time" id="presTimeEnd">00:37</span>
+    </div>
+  </div>
+
+
+  <!-- Scroll arrows -->
+  <div class="scroll-arrows">
+    <button class="scroll-arrow scroll-arrow--up" id="scrollUp"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></button>
+    <button class="scroll-arrow scroll-arrow--down" id="scrollDown"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+  </div>
+
+  <!-- Canvas Viewport -->
+  <div class="canvas-viewport" id="viewport">
+    <div class="canvas-world" id="world">
+
+      <!-- ===== ROW 0: HERO INTRO ===== -->
+      <div class="slide slide--dark" id="hero" data-slide="0" data-row="0" data-col="0">
+        <canvas id="particleCanvas" class="particle-canvas"></canvas>
+        <p class="slide__explore-overlay">Explore <span>&#8599;</span></p>
+      </div>
+      <div class="slide slide--dark" id="intro" data-slide="1" data-row="0" data-col="1">
+        <div class="slide__content">
+          <p class="slide__sig">wahab</p>
+          <h2 class="slide__heading-sm">Hi, I'm Abdul Wahab</h2>
+          <p class="slide__role">Senior UI/UX Designer @ Accenture Song</p>
+          <p class="slide__body">I blend creativity and technical background to design <em>beautiful UI</em> and efficient UX. CS background meets design thinking.</p>
+          <p class="slide__link">Learn more <span>&#8599;</span></p>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="about-1" data-slide="2" data-row="0" data-col="2">
+        <div class="slide__content">
+          <p class="slide__label">Why Me</p>
+          <p class="slide__body-lg">Beautiful UI + Efficient UX + <em>CS Background</em></p>
+          <p class="slide__body" style="margin-top:0.75rem">Creating user-centered digital solutions informed by design and fueled by technical excellence.</p>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="about-2" data-slide="3" data-row="0" data-col="3">
+        <div class="slide__content">
+          <p class="slide__label">Stats</p>
+          <p class="slide__body-lg">47+ pro bono mentorships</p>
+          <p class="slide__body-lg">6+ years experience</p>
+          <p class="slide__body-lg">35+ work endorsements</p>
+          <p class="slide__body-lg">114+ Webflow sites</p>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="about-3" data-slide="4" data-row="0" data-col="4">
+        <div class="slide__content">
+          <p class="slide__label">Education</p>
+          <p class="slide__body-lg">BS Computer Science</p>
+          <p class="slide__body">FAST-NUCES (2015 - 2019)</p>
+          <p class="slide__label" style="margin-top:1.5rem">Certifications</p>
+          <p class="slide__body">Advanced Design Thinking (IDEO U)</p>
+          <p class="slide__body">Business Innovation (IDEO U)</p>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="about-4" data-slide="5" data-row="0" data-col="5">
+        <div class="slide__content">
+          <p class="slide__label">Expertise</p>
+          <p class="slide__body">Strategic Design: UX Audits, Information Architecture, Customer Journeys</p>
+          <p class="slide__body" style="margin-top:0.5rem">Visual Excellence: High-fidelity UI, Mobile & Dashboard Design (Figma)</p>
+          <p class="slide__body" style="margin-top:0.5rem">Technical: HTML/CSS/JS, Webflow Expert, AI-driven prototyping (Cursor AI)</p>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="roles" data-slide="6" data-row="0" data-col="6">
+        <div class="slide__content">
+          <p class="slide__label">Roles</p>
+          <p class="slide__body-lg">Senior UI/UX Designer</p>
+          <p class="slide__body">Accenture Song &middot; Doha, Qatar</p>
+          <p class="slide__body-lg" style="margin-top:0.75rem">Figma Chapter Leader</p>
+          <p class="slide__body">Doha, Qatar</p>
+          <p class="slide__body-lg" style="margin-top:0.75rem">Webflow Chapter Leader</p>
+          <p class="slide__body">Islamabad (Alum)</p>
+        </div>
+      </div>
+
+      <!-- ===== ROW 1: EXPLORE NAV + MY WORK INDEX ===== -->
+      <div class="slide slide--dark" id="explore" data-slide="7" data-row="1" data-col="0">
+        <div class="slide__content">
+          <p class="slide__label">Explore</p>
+          <div class="slide__nav-list">
+            <a href="#intro" class="nav-list-item" data-goto="intro">
+              <span class="nav-list-num">01</span>
+              <span class="nav-list-text">Why me</span>
+            </a>
+            <a href="#endorsements" class="nav-list-item" data-goto="endorsements">
+              <span class="nav-list-num">02</span>
+              <span class="nav-list-text">Endorsements</span>
+            </a>
+            <a href="#work" class="nav-list-item" data-goto="work">
+              <span class="nav-list-num">03</span>
+              <span class="nav-list-text">Portfolio</span>
+            </a>
+            <a href="#contact" class="nav-list-item" data-goto="contact">
+              <span class="nav-list-num">04</span>
+              <span class="nav-list-text">Reach out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="work" data-slide="8" data-row="1" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">Featured Work</p>
+          <div class="slide__work-list">
+            <p><span class="dot dot--blue"></span> Gastronaut GmbH</p>
+            <p><span class="dot dot--purple"></span> PK.Page</p>
+            <p><span class="dot dot--cyan"></span> BirdAppAds</p>
+            <p><span class="dot dot--green"></span> Moolah Cash</p>
+            <p><span class="dot dot--orange"></span> Carnaan</p>
+            <p><span class="dot dot--red"></span> Axe Automation</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ROW 2: ENDORSEMENTS ===== -->
+      <div class="slide slide--dark" id="endorsements" data-slide="9" data-row="2" data-col="0">
+        <div class="slide__content">
+          <p class="slide__label">Endorsements</p>
+          <h3 class="slide__project-name">35+ Work Reviews</h3>
+          <p class="slide__body">Kind words from founders, engineers, and designers I've worked with.</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="endorsement-1" data-slide="10" data-row="2" data-col="1">
+        <div class="slide__content">
+          <p class="slide__body" style="font-style:italic">"Wahab is the most positive person I have ever worked with. Great design skills, professional in Figma and Webflow."</p>
+          <p class="slide__meta" style="margin-top:auto">Arif Omanovic &middot; UX/UI Designer, Gastronaut</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="endorsement-2" data-slide="11" data-row="2" data-col="2">
+        <div class="slide__content">
+          <p class="slide__body" style="font-style:italic">"He is reliable, professional and extremely pixel perfect working. Was a pleasure to work with him!"</p>
+          <p class="slide__meta" style="margin-top:auto">Nico Huck &middot; Head of Management, ESKOR</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="endorsement-3" data-slide="12" data-row="2" data-col="3">
+        <div class="slide__content">
+          <p class="slide__body" style="font-style:italic">"Working with Abdul Wahab is like having a creative cheat code on your team. He pulls off brilliant ideas from blank pages."</p>
+          <p class="slide__meta" style="margin-top:auto">Nasreddine El Aissaoui &middot; Art Director, Descifer</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="endorsement-4" data-slide="13" data-row="2" data-col="4">
+        <div class="slide__content">
+          <p class="slide__body" style="font-style:italic">"Wahab did an excellent job in terms of quality and time. He has a lot of experience with Webflow and he's very helpful."</p>
+          <p class="slide__meta" style="margin-top:auto">Jaime Fernandez &middot; Founder, Fintechtandem</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="endorsement-5" data-slide="14" data-row="2" data-col="5">
+        <div class="slide__content">
+          <p class="slide__body" style="font-style:italic">"It was an absolute pleasure working with Wahab. He's a Webflow & Figma expert and will take your project to the next level."</p>
+          <p class="slide__meta" style="margin-top:auto">Donnya Piggott &middot; Founder, Pink Coconuts</p>
+        </div>
+      </div>
+
+      <!-- ===== ROW 3: GASTRONAUT ===== -->
+      <div class="slide slide--dark" id="gastronaut" data-slide="15" data-row="3" data-col="0">
+        <div class="slide__content">
+          <p class="slide__label">01</p>
+          <h3 class="slide__project-name">Gastronaut GmbH</h3>
+          <p class="slide__body">AI reservation management system for restaurants. Led complete app redesign.</p>
+          <div class="slide__tags"><span>800+ Screens</span><span>720+ Users</span></div>
+        </div>
+      </div>
+      <div class="slide slide--light" id="gastronaut-2" data-slide="16" data-row="3" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">Role</p>
+          <p class="slide__body-lg">Product Designer</p>
+          <p class="slide__body">Collaborated with dev teams to bridge design and development. Used user research to inform design decisions and improve UX.</p>
+          <p class="slide__meta" style="margin-top:auto">Oct 2021 - Nov 2022 &middot; Remote</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="gastronaut-3" data-slide="17" data-row="3" data-col="2">
+        <div class="slide__content">
+          <p class="slide__label">Impact</p>
+          <p class="slide__body">Developed wireframes and prototypes ensuring intuitive interaction design. Created visually appealing interfaces aligned with brand identity.</p>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="gastronaut-img" data-slide="18" data-row="3" data-col="3">
+        <div class="slide__content slide__content--image" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+        </div>
+      </div>
+
+      <!-- ===== ROW 4: PK.PAGE ===== -->
+      <div class="slide slide--dark" id="pkpage" data-slide="19" data-row="4" data-col="0">
+        <div class="slide__content">
+          <p class="slide__label">02</p>
+          <h3 class="slide__project-name">PK.Page</h3>
+          <p class="slide__body">DIY website builder specifically for Pakistani audience. 1st brand in Pakistan.</p>
+          <div class="slide__tags"><span>350+ Screens</span><span>14K+ Users</span></div>
+        </div>
+      </div>
+      <div class="slide slide--light" id="pkpage-2" data-slide="20" data-row="4" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">Role</p>
+          <p class="slide__body-lg">Product Designer / Design Consultant</p>
+          <p class="slide__body">Emerging markets focused DIY website building platform with hyper-localized experience and language support.</p>
+          <p class="slide__meta" style="margin-top:auto">Feb 2020 - Aug 2022 &middot; Islamabad</p>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="pkpage-img" data-slide="21" data-row="4" data-col="2">
+        <div class="slide__content slide__content--image" style="background: linear-gradient(135deg, #0f3460 0%, #533483 100%);">
+        </div>
+      </div>
+
+      <!-- ===== ROW 5: BIRDAPPADS ===== -->
+      <div class="slide slide--dark" id="birdapp" data-slide="22" data-row="5" data-col="0">
+        <div class="slide__content slide__content--image" style="background: linear-gradient(135deg, #0d8ecf 0%, #1DA1F2 100%);">
+        </div>
+      </div>
+      <div class="slide slide--light" id="birdapp-2" data-slide="23" data-row="5" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">03</p>
+          <h3 class="slide__project-name">BirdAppAds</h3>
+          <p class="slide__body">Better UX-focused landing page solution for Twitter ad campaigns.</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="birdapp-3" data-slide="24" data-row="5" data-col="2">
+        <div class="slide__content">
+          <p class="slide__label">Approach</p>
+          <p class="slide__body">Streamlined ad campaign management with intuitive dashboards and automated reporting workflows.</p>
+        </div>
+      </div>
+
+      <!-- ===== ROW 6: MOOLAH CASH ===== -->
+      <div class="slide slide--dark" id="moolah" data-slide="25" data-row="6" data-col="0">
+        <div class="slide__content slide__content--image" style="background: linear-gradient(135deg, #1b4332 0%, #52b788 100%);">
+        </div>
+      </div>
+      <div class="slide slide--light" id="moolah-2" data-slide="26" data-row="6" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">04</p>
+          <h3 class="slide__project-name">Moolah Cash</h3>
+          <p class="slide__body">Payment transfer app making personal finance accessible and intuitive for everyday users.</p>
+          <div class="slide__tags"><span>Mobile App</span><span>Fintech</span></div>
+        </div>
+      </div>
+
+      <!-- ===== ROW 7: CARNAAN ===== -->
+      <div class="slide slide--dark" id="carnaan" data-slide="27" data-row="7" data-col="0">
+        <div class="slide__content slide__content--image" style="background: linear-gradient(135deg, #3d405b 0%, #b5838d 100%);">
+        </div>
+      </div>
+      <div class="slide slide--light" id="carnaan-2" data-slide="28" data-row="7" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">05</p>
+          <h3 class="slide__project-name">Carnaan</h3>
+          <p class="slide__body">Auto dealership management solution with modern e-commerce experience.</p>
+          <div class="slide__tags"><span>Webflow</span><span>E-commerce</span></div>
+        </div>
+      </div>
+
+      <!-- ===== ROW 8: AXE AUTOMATION ===== -->
+      <div class="slide slide--dark" id="axe" data-slide="29" data-row="8" data-col="0">
+        <div class="slide__content slide__content--image" style="background: linear-gradient(135deg, #6b0f1a 0%, #e63946 100%);">
+        </div>
+      </div>
+      <div class="slide slide--light" id="axe-2" data-slide="30" data-row="8" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">06</p>
+          <h3 class="slide__project-name">Axe Automation</h3>
+          <p class="slide__body">Redesign of old website into a modern marketing automation platform.</p>
+          <div class="slide__tags"><span>SaaS</span><span>Redesign</span></div>
+        </div>
+      </div>
+
+      <!-- ===== ROW 9: SIDE PROJECTS ===== -->
+      <div class="slide slide--dark" id="side-projects" data-slide="31" data-row="9" data-col="0">
+        <div class="slide__content">
+          <p class="slide__label">Side Projects</p>
+          <h3 class="slide__project-name">Build. Ship. Repeat.</h3>
+          <p class="slide__body">In free time, I develop Webflow websites, write articles and build extensions.</p>
+          <div class="slide__tags"><span>114 Webflow Sites</span><span>1 Extension</span><span>1 Article</span></div>
+        </div>
+      </div>
+      <div class="slide slide--light" id="spelling-checker" data-slide="32" data-row="9" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">Figma Plugin</p>
+          <h3 class="slide__project-name">Spelling Checker</h3>
+          <p class="slide__body">Scan Figma pages for spelling mistakes. Works in Figma, FigJam and Slides. 489K+ word dictionary.</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="tasktodo" data-slide="33" data-row="9" data-col="2">
+        <div class="slide__content">
+          <p class="slide__label">Chrome Extension</p>
+          <h3 class="slide__project-name">TaskTodo</h3>
+          <p class="slide__body">Manage your today tasks on new tab. Simple, prioritized, complete with a few clicks.</p>
+          <p class="slide__meta" style="margin-top:auto">24 Active Users &middot; Chrome Store</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="ux-article" data-slide="34" data-row="9" data-col="3">
+        <div class="slide__content">
+          <p class="slide__label">Medium Article</p>
+          <h3 class="slide__project-name">Laws of UX that Airbnb follows</h3>
+          <p class="slide__body">Published on UX Planet. Exploring the UX strategies and principles behind Airbnb's mobile design.</p>
+        </div>
+      </div>
+
+      <!-- ===== ROW 10: EXPERIENCE ===== -->
+      <div class="slide slide--dark" id="experience" data-slide="35" data-row="10" data-col="0">
+        <div class="slide__content">
+          <p class="slide__label">Experience</p>
+          <div class="slide__work-list">
+            <p><span class="dot dot--blue"></span> Accenture Song (2025-Present)</p>
+            <p><span class="dot dot--purple"></span> Descifer (2024-2025)</p>
+            <p><span class="dot dot--green"></span> Stealth Startup (2022-2023)</p>
+            <p><span class="dot dot--orange"></span> Gastronaut GmbH (2021-2022)</p>
+            <p><span class="dot dot--cyan"></span> uPage / PK.Page (2020-2022)</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide slide--light" id="accenture" data-slide="36" data-row="10" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">Current</p>
+          <p class="slide__body-lg">Senior Visual Design Analyst</p>
+          <p class="slide__body">Accenture Song &middot; Doha, Qatar</p>
+          <p class="slide__body" style="margin-top:0.5rem">Visual Design, Design Systems, UI/UX for enterprise clients across the Middle East.</p>
+        </div>
+      </div>
+      <div class="slide slide--light" id="descifer" data-slide="37" data-row="10" data-col="2">
+        <div class="slide__content">
+          <p class="slide__label">Previous</p>
+          <p class="slide__body-lg">Digital Designer</p>
+          <p class="slide__body">Descifer &middot; Qatar</p>
+          <p class="slide__body" style="margin-top:0.5rem">Led design team, managed global freelancers, directed end-to-end projects with high quality standards.</p>
+        </div>
+      </div>
+
+      <!-- ===== ROW 11: CONTACT ===== -->
+      <div class="slide slide--dark" id="contact" data-slide="38" data-row="11" data-col="0">
+        <div class="slide__content">
+          <p class="slide__label">Get in touch</p>
+          <h3 class="slide__heading-sm">Abdul Wahab</h3>
+          <p class="slide__body">hello@abdulwahab.design</p>
+          <p class="slide__link" style="margin-top:1rem">Connect on LinkedIn <span>&#8599;</span></p>
+        </div>
+      </div>
+      <div class="slide slide--dark" id="contact-2" data-slide="39" data-row="11" data-col="1">
+        <div class="slide__content">
+          <p class="slide__label">Available for</p>
+          <p class="slide__body-lg">Freelance UI/UX Projects</p>
+          <p class="slide__body" style="margin-top:0.75rem">I'm quick on LinkedIn and emails. Feel free to reach out to bring your digital projects to life!</p>
+          <p class="slide__meta" style="margin-top:auto">Doha, Qatar &middot; abdulwahab.design</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="particles.js"></script>
+</body>
+</html>
