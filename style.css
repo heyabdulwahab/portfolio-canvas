@@ -478,9 +478,10 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   font-size: 0.75rem;
   font-family: var(--font-mono);
   color: rgba(255,255,255,0.5);
-  min-width: 48px;
+  min-width: 56px;
   text-align: center;
   user-select: none;
+  white-space: nowrap;
 }
 
 .pres-bar__divider {
@@ -825,8 +826,9 @@ body.presenting .presenter-btn {
   }
 
   .presenter-btn {
-    padding: 0.4rem 1rem;
-    font-size: 0.75rem;
+    height: 36px;
+    padding: 0 1rem;
+    font-size: 0.8125rem;
     bottom: 1rem;
   }
 
