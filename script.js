@@ -119,15 +119,27 @@
 
         // After a brief pause showing the grid, slowly zoom into hero
         setTimeout(() => {
-          // Use a slower animation for the opening
-          world.style.transition = 'transform 2.5s cubic-bezier(0.25, 0.1, 0.25, 1)';
-          centerOnSlide(slideOrder[0], false);
-          applyTransform();
+          const vw = viewport.clientWidth;
+          const vh = viewport.clientHeight;
+          const sl = parseFloat(slideOrder[0].style.left);
+          const st = parseFloat(slideOrder[0].style.top);
+          const scX = (vw * 0.75) / SLIDE_W;
+          const scY = (vh * 0.75) / SLIDE_H;
+          const endScale = Math.min(scX, scY, 1.5);
+          const endPanX = (vw / 2) - (sl + SLIDE_W / 2) * endScale;
+          const endPanY = (vh / 2) - (st + SLIDE_H / 2) * endScale;
 
-          // Reset transition after animation completes
-          setTimeout(() => {
-            world.style.transition = '';
-          }, 2600);
+          gsap.to({ s: scale, px: panX, py: panY }, {
+            s: endScale, px: endPanX, py: endPanY,
+            duration: 2.5,
+            ease: 'power2.inOut',
+            onUpdate: function () {
+              scale = this.targets()[0].s;
+              panX = this.targets()[0].px;
+              panY = this.targets()[0].py;
+              applyTransform();
+            }
+          });
         }, 800);
       }, 2500);
     }
@@ -356,17 +368,21 @@
     if (animate) animateTransform(); else applyTransform();
   }
 
-  // ====== CINEMATIC SLIDE TRANSITION ======
-  // 3-phase: zoom-out → pan → zoom-in (based on recorded animation frames)
+  // ====== CINEMATIC SLIDE TRANSITION (GSAP + wave) ======
+  // 3-phase: zoom-out → wave pan → zoom-in
+  let activeTween = null;
+
   function cinematicNavigate(targetSlide, duration, cb) {
-    if (!targetSlide || isAnimating) return;
+    if (!targetSlide) return;
+    // Kill any running transition
+    if (activeTween) { activeTween.kill(); activeTween = null; }
     isAnimating = true;
-    duration = duration || 1200;
+    duration = (duration || 1200) / 1000; // GSAP uses seconds
 
     const vw = viewport.clientWidth;
     const vh = viewport.clientHeight;
 
-    // Current focus point in world coords (what's at screen center now)
+    // Current focus point in world coords
     const startFocusX = (vw / 2 - panX) / scale;
     const startFocusY = (vh / 2 - panY) / scale;
     const startScale = scale;
@@ -375,61 +391,62 @@
     const targetFocusX = parseFloat(targetSlide.style.left) + SLIDE_W / 2;
     const targetFocusY = parseFloat(targetSlide.style.top) + SLIDE_H / 2;
 
-    // Target scale (same as centerOnSlide)
+    // Target scale
     const pad = presenting ? 0.88 : 0.75;
     const maxZoom = presenting ? 2.2 : 1.5;
     const scX = (vw * pad) / SLIDE_W;
     const scY = (vh * pad) / SLIDE_H;
     const targetScale = Math.min(scX, scY, maxZoom);
 
-    // Zoom-out depth based on distance (further = more zoom out)
+    // Zoom-out depth based on distance
     const dx = targetFocusX - startFocusX;
     const dy = targetFocusY - startFocusY;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const zoomOutFactor = Math.min(0.5, 0.25 + dist / 4000);
     const midScale = Math.min(startScale, targetScale) * (1 - zoomOutFactor);
 
-    const startTime = performance.now();
+    // Wave amplitude — vertical swoop in pixels, scales with distance
+    const waveAmp = Math.min(80, 25 + dist * 0.03);
 
-    function animate(now) {
-      const t = Math.min((now - startTime) / duration, 1);
+    // Animate a progress proxy from 0 → 1
+    const proxy = { p: 0 };
 
-      // Smooth ease-in-out for focus point movement
-      const eased = t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    activeTween = gsap.to(proxy, {
+      p: 1,
+      duration: duration,
+      ease: 'power2.inOut',
+      onUpdate: function () {
+        const t = proxy.p;
 
-      // Focus point moves from current to target
-      const focusX = startFocusX + (targetFocusX - startFocusX) * eased;
-      const focusY = startFocusY + (targetFocusY - startFocusY) * eased;
+        // Focus interpolation with GSAP easing already applied via proxy
+        const focusX = startFocusX + (targetFocusX - startFocusX) * t;
+        const focusY = startFocusY + (targetFocusY - startFocusY) * t;
 
-      // Scale follows a valley: start → mid (zoomed out) → target
-      // Using smoothstep in two halves
-      if (t <= 0.5) {
-        const h = t / 0.5;
-        const s = h * h * (3 - 2 * h);
-        scale = startScale + (midScale - startScale) * s;
-      } else {
-        const h = (t - 0.5) / 0.5;
-        const s = h * h * (3 - 2 * h);
-        scale = midScale + (targetScale - midScale) * s;
-      }
+        // Scale valley: zoom out at midpoint, zoom in at ends
+        const sinT = Math.sin(t * Math.PI); // 0 → 1 → 0
+        const baseScale = startScale + (targetScale - startScale) * t;
+        scale = baseScale - (baseScale - midScale) * sinT;
 
-      // Derive pan from focus point and current scale
-      panX = vw / 2 - focusX * scale;
-      panY = vh / 2 - focusY * scale;
+        // Wave: vertical swoop — dips down at midpoint then returns
+        const waveOffset = sinT * waveAmp;
 
-      applyTransform();
+        // Derive pan from focus + scale + wave offset
+        panX = vw / 2 - focusX * scale;
+        panY = vh / 2 - focusY * scale + waveOffset;
 
-      if (t < 1) {
-        requestAnimationFrame(animate);
-      } else {
+        applyTransform();
+      },
+      onComplete: function () {
+        // Snap to exact final values
+        scale = targetScale;
+        panX = (vw / 2) - targetFocusX * targetScale;
+        panY = (vh / 2) - targetFocusY * targetScale;
+        applyTransform();
         isAnimating = false;
+        activeTween = null;
         if (cb) cb();
       }
-    }
-
-    requestAnimationFrame(animate);
+    });
   }
 
   // ====== NAV PAD (slide navigation) ======
@@ -506,10 +523,30 @@
     presBar.classList.remove('active');
     slideOrder.forEach(s => s.classList.remove('spotlight'));
     navSlideIndex = lastSlide;
-    // Smoothly animate from presentation zoom to canvas zoom on the same slide
-    world.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)';
-    centerOnSlide(slideOrder[lastSlide], false);
-    setTimeout(() => { world.style.transition = ''; }, 850);
+
+    // GSAP smooth zoom from presentation level to canvas level
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+    const sl = parseFloat(slideOrder[lastSlide].style.left);
+    const st = parseFloat(slideOrder[lastSlide].style.top);
+    const scX = (vw * 0.75) / SLIDE_W;
+    const scY = (vh * 0.75) / SLIDE_H;
+    const endScale = Math.min(scX, scY, 1.5);
+    const endPanX = (vw / 2) - (sl + SLIDE_W / 2) * endScale;
+    const endPanY = (vh / 2) - (st + SLIDE_H / 2) * endScale;
+
+    gsap.to({ s: scale, px: panX, py: panY }, {
+      s: endScale, px: endPanX, py: endPanY,
+      duration: 0.8,
+      ease: 'power2.inOut',
+      onUpdate: function () {
+        scale = this.targets()[0].s;
+        panX = this.targets()[0].px;
+        panY = this.targets()[0].py;
+        applyTransform();
+      }
+    });
+
     updateNavButtons();
   }
 
