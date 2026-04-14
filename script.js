@@ -93,16 +93,26 @@
     if (hash) {
       const targetSlide = document.getElementById(hash);
       if (targetSlide) {
-        centerOnSlide(targetSlide, false);
+        // Start with grid overview behind loading screen
+        fitAll(false);
+        applyTransform();
+        // Hide loading, then animate to the target slide
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+          clearInterval(loadingInterval);
+          // Animate to the target slide after loading screen fades
+          setTimeout(() => {
+            centerOnSlide(targetSlide, true);
+          }, 100);
+        }, 1500);
       } else {
         fitAll(false);
+        applyTransform();
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+          clearInterval(loadingInterval);
+        }, 1500);
       }
-      applyTransform();
-      // Hide loading
-      setTimeout(() => {
-        loadingScreen.classList.add('hidden');
-        clearInterval(loadingInterval);
-      }, 1500);
     } else {
       // Start with full grid overview, then slowly zoom into hero
       fitAll(false);
