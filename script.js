@@ -505,7 +505,7 @@
     presBar.classList.remove('active');
     slideOrder.forEach(s => s.classList.remove('spotlight'));
     navSlideIndex = 0;
-    centerOnSlide(slideOrder[0], true);
+    cinematicNavigate(slideOrder[0], 1400);
     updateNavButtons();
   }
 
