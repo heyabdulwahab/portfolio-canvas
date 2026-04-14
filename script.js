@@ -499,13 +499,15 @@
   }
 
   function exitPresentation() {
+    const lastSlide = currentSlide;
     presenting = false;
     document.body.classList.remove('presenting');
     viewport.classList.remove('presenting');
     presBar.classList.remove('active');
     slideOrder.forEach(s => s.classList.remove('spotlight'));
-    navSlideIndex = 0;
-    cinematicNavigate(slideOrder[0], 1400);
+    navSlideIndex = lastSlide;
+    // Re-center on the same slide with canvas-mode zoom level
+    centerOnSlide(slideOrder[lastSlide], false);
     updateNavButtons();
   }
 
