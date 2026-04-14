@@ -75,6 +75,9 @@
   let dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
   let hasMoved = false;
 
+  // Navigation (non-presenting mode)
+  let navSlideIndex = 0;
+
   // Presentation
   let presenting = false;
   let presPlaying = false;
@@ -93,16 +96,26 @@
     if (hash) {
       const targetSlide = document.getElementById(hash);
       if (targetSlide) {
-        centerOnSlide(targetSlide, false);
+        // Start with grid overview behind loading screen
+        fitAll(false);
+        applyTransform();
+        // Hide loading, then animate to the target slide
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+          clearInterval(loadingInterval);
+          // Animate to the target slide after loading screen fades
+          setTimeout(() => {
+            centerOnSlide(targetSlide, true);
+          }, 100);
+        }, 1500);
       } else {
         fitAll(false);
+        applyTransform();
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+          clearInterval(loadingInterval);
+        }, 1500);
       }
-      applyTransform();
-      // Hide loading
-      setTimeout(() => {
-        loadingScreen.classList.add('hidden');
-        clearInterval(loadingInterval);
-      }, 1500);
     } else {
       // Start with full grid overview, then slowly zoom into hero
       fitAll(false);
@@ -295,7 +308,9 @@
     const slide = e.target.closest('.slide');
     if (slide) {
       centerOnSlide(slide, true);
-      // Update URL hash
+      // Update nav index and URL hash
+      const idx = slideOrder.indexOf(slide);
+      if (idx >= 0) navSlideIndex = idx;
       if (slide.id) {
         history.replaceState(null, '', '#' + slide.id);
       }
@@ -365,6 +380,8 @@
       if (target) {
         closeMenu();
         centerOnSlide(target, true);
+        const idx = slideOrder.indexOf(target);
+        if (idx >= 0) navSlideIndex = idx;
         history.replaceState(null, '', '#' + link.dataset.goto);
       }
     });
@@ -449,15 +466,24 @@
     const target = document.getElementById(hash);
     if (target && !presenting) {
       centerOnSlide(target, true);
+      const idx = slideOrder.indexOf(target);
+      if (idx >= 0) navSlideIndex = idx;
     }
   });
 
-  // ====== DIRECTION PAD ======
-  const PAN_STEP = 200;
-  document.getElementById('scrollUp').addEventListener('click', () => { panY += PAN_STEP; animateTransform(); });
-  document.getElementById('scrollDown').addEventListener('click', () => { panY -= PAN_STEP; animateTransform(); });
-  document.getElementById('scrollLeft').addEventListener('click', () => { panX += PAN_STEP; animateTransform(); });
-  document.getElementById('scrollRight').addEventListener('click', () => { panX -= PAN_STEP; animateTransform(); });
+  // ====== NAVIGATION ARROWS ======
+  function navigateSlide(direction) {
+    if (presenting) return;
+    const nextIndex = navSlideIndex + direction;
+    if (nextIndex < 0 || nextIndex >= totalSlides) return;
+    navSlideIndex = nextIndex;
+    const slide = slideOrder[navSlideIndex];
+    centerOnSlide(slide, true);
+    if (slide.id) history.replaceState(null, '', '#' + slide.id);
+  }
+
+  document.getElementById('navPrev').addEventListener('click', () => navigateSlide(-1));
+  document.getElementById('navNext').addEventListener('click', () => navigateSlide(1));
 
   // ====== ZOOM BUTTONS ======
   document.getElementById('zoomInBtn').addEventListener('click', () => {
