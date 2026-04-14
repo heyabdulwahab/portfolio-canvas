@@ -83,6 +83,10 @@
   const SLIDE_DURATION = 4000; // ms per slide
   let presInterval = null;
 
+  // Canvas-mode slide navigation
+  let navSlideIndex = 0;
+  let isAnimating = false;
+
   const ZOOM_MIN = 0.08;
   const ZOOM_MAX = 2;
 
@@ -294,8 +298,11 @@
     if (presenting) return;
     const slide = e.target.closest('.slide');
     if (slide) {
-      centerOnSlide(slide, true);
-      // Update URL hash
+      // Sync navSlideIndex
+      const idx = slideOrder.indexOf(slide);
+      if (idx !== -1) navSlideIndex = idx;
+      cinematicNavigate(slide, 1200);
+      updateNavButtons();
       if (slide.id) {
         history.replaceState(null, '', '#' + slide.id);
       }
@@ -349,6 +356,107 @@
     if (animate) animateTransform(); else applyTransform();
   }
 
+  // ====== CINEMATIC SLIDE TRANSITION ======
+  // 3-phase: zoom-out → pan → zoom-in (based on recorded animation frames)
+  function cinematicNavigate(targetSlide, duration, cb) {
+    if (!targetSlide || isAnimating) return;
+    isAnimating = true;
+    duration = duration || 1200;
+
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+
+    // Current focus point in world coords (what's at screen center now)
+    const startFocusX = (vw / 2 - panX) / scale;
+    const startFocusY = (vh / 2 - panY) / scale;
+    const startScale = scale;
+
+    // Target focus point (center of target slide)
+    const targetFocusX = parseFloat(targetSlide.style.left) + SLIDE_W / 2;
+    const targetFocusY = parseFloat(targetSlide.style.top) + SLIDE_H / 2;
+
+    // Target scale (same as centerOnSlide)
+    const pad = presenting ? 0.88 : 0.75;
+    const maxZoom = presenting ? 2.2 : 1.5;
+    const scX = (vw * pad) / SLIDE_W;
+    const scY = (vh * pad) / SLIDE_H;
+    const targetScale = Math.min(scX, scY, maxZoom);
+
+    // Zoom-out depth based on distance (further = more zoom out)
+    const dx = targetFocusX - startFocusX;
+    const dy = targetFocusY - startFocusY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const zoomOutFactor = Math.min(0.5, 0.25 + dist / 4000);
+    const midScale = Math.min(startScale, targetScale) * (1 - zoomOutFactor);
+
+    const startTime = performance.now();
+
+    function animate(now) {
+      const t = Math.min((now - startTime) / duration, 1);
+
+      // Smooth ease-in-out for focus point movement
+      const eased = t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+      // Focus point moves from current to target
+      const focusX = startFocusX + (targetFocusX - startFocusX) * eased;
+      const focusY = startFocusY + (targetFocusY - startFocusY) * eased;
+
+      // Scale follows a valley: start → mid (zoomed out) → target
+      // Using smoothstep in two halves
+      if (t <= 0.5) {
+        const h = t / 0.5;
+        const s = h * h * (3 - 2 * h);
+        scale = startScale + (midScale - startScale) * s;
+      } else {
+        const h = (t - 0.5) / 0.5;
+        const s = h * h * (3 - 2 * h);
+        scale = midScale + (targetScale - midScale) * s;
+      }
+
+      // Derive pan from focus point and current scale
+      panX = vw / 2 - focusX * scale;
+      panY = vh / 2 - focusY * scale;
+
+      applyTransform();
+
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        isAnimating = false;
+        if (cb) cb();
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  // ====== NAV PAD (slide navigation) ======
+  const navPrevBtn = document.getElementById('navPrev');
+  const navNextBtn = document.getElementById('navNext');
+
+  function updateNavButtons() {
+    if (navPrevBtn) navPrevBtn.disabled = navSlideIndex <= 0;
+    if (navNextBtn) navNextBtn.disabled = navSlideIndex >= totalSlides - 1;
+  }
+
+  function navigateSlide(direction) {
+    if (presenting || isAnimating) return;
+    const newIndex = navSlideIndex + direction;
+    if (newIndex < 0 || newIndex >= totalSlides) return;
+    navSlideIndex = newIndex;
+    const target = slideOrder[navSlideIndex];
+    cinematicNavigate(target, 1200);
+    if (target.id) history.replaceState(null, '', '#' + target.id);
+    updateNavButtons();
+  }
+
+  if (navPrevBtn) navPrevBtn.addEventListener('click', () => navigateSlide(-1));
+  if (navNextBtn) navNextBtn.addEventListener('click', () => navigateSlide(1));
+
+  updateNavButtons();
+
   // ====== SIDE MENU ======
   function openMenu() { sideMenu.classList.add('open'); }
   function closeMenu() { sideMenu.classList.remove('open'); }
@@ -364,7 +472,10 @@
       const target = document.getElementById(link.dataset.goto);
       if (target) {
         closeMenu();
-        centerOnSlide(target, true);
+        const idx = slideOrder.indexOf(target);
+        if (idx !== -1) navSlideIndex = idx;
+        cinematicNavigate(target, 1200);
+        updateNavButtons();
         history.replaceState(null, '', '#' + link.dataset.goto);
       }
     });
@@ -397,11 +508,15 @@
   }
 
   function goToPresSlide(index, animate) {
-    if (index < 0 || index >= totalSlides) return;
+    if (index < 0 || index >= totalSlides || isAnimating) return;
     currentSlide = index;
     slideOrder.forEach(s => s.classList.remove('spotlight'));
     slideOrder[currentSlide].classList.add('spotlight');
-    centerOnSlide(slideOrder[currentSlide], animate);
+    if (animate) {
+      cinematicNavigate(slideOrder[currentSlide], 1200);
+    } else {
+      centerOnSlide(slideOrder[currentSlide], false);
+    }
     updatePresUI();
     const id = slideOrder[currentSlide].id;
     if (id) history.replaceState(null, '', '#' + id);
@@ -440,6 +555,8 @@
       }
     } else {
       if (e.key === '0') fitAll(true);
+      if (e.key === 'ArrowRight') { e.preventDefault(); navigateSlide(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); navigateSlide(-1); }
     }
   });
 
@@ -448,16 +565,14 @@
     const hash = window.location.hash.replace('#', '');
     const target = document.getElementById(hash);
     if (target && !presenting) {
-      centerOnSlide(target, true);
+      const idx = slideOrder.indexOf(target);
+      if (idx !== -1) navSlideIndex = idx;
+      cinematicNavigate(target, 1200);
+      updateNavButtons();
     }
   });
 
-  // ====== DIRECTION PAD ======
-  const PAN_STEP = 200;
-  document.getElementById('scrollUp').addEventListener('click', () => { panY += PAN_STEP; animateTransform(); });
-  document.getElementById('scrollDown').addEventListener('click', () => { panY -= PAN_STEP; animateTransform(); });
-  document.getElementById('scrollLeft').addEventListener('click', () => { panX += PAN_STEP; animateTransform(); });
-  document.getElementById('scrollRight').addEventListener('click', () => { panX -= PAN_STEP; animateTransform(); });
+  // (Direction pad replaced by nav-pad slide navigation above)
 
   // ====== ZOOM BUTTONS ======
   document.getElementById('zoomInBtn').addEventListener('click', () => {
