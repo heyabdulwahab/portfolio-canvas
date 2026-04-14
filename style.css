@@ -413,7 +413,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   left: 1.25rem;
   z-index: 100;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 2px;
 }
 
