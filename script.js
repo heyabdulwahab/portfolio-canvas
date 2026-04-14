@@ -504,7 +504,9 @@
     viewport.classList.remove('presenting');
     presBar.classList.remove('active');
     slideOrder.forEach(s => s.classList.remove('spotlight'));
-    fitAll(true);
+    navSlideIndex = 0;
+    centerOnSlide(slideOrder[0], true);
+    updateNavButtons();
   }
 
   function goToPresSlide(index, animate) {
