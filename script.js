@@ -402,11 +402,11 @@
     const dx = targetFocusX - startFocusX;
     const dy = targetFocusY - startFocusY;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const zoomOutFactor = Math.min(0.5, 0.25 + dist / 4000);
+    const zoomOutFactor = Math.min(0.2, 0.1 + dist / 8000);
     const midScale = Math.min(startScale, targetScale) * (1 - zoomOutFactor);
 
     // Wave amplitude — vertical swoop in pixels, scales with distance
-    const waveAmp = Math.min(80, 25 + dist * 0.03);
+    const waveAmp = Math.min(50, 15 + dist * 0.02);
 
     // Animate a progress proxy from 0 → 1
     const proxy = { p: 0 };
