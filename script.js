@@ -506,8 +506,10 @@
     presBar.classList.remove('active');
     slideOrder.forEach(s => s.classList.remove('spotlight'));
     navSlideIndex = lastSlide;
-    // Re-center on the same slide with canvas-mode zoom level
+    // Smoothly animate from presentation zoom to canvas zoom on the same slide
+    world.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)';
     centerOnSlide(slideOrder[lastSlide], false);
+    setTimeout(() => { world.style.transition = ''; }, 850);
     updateNavButtons();
   }
 
